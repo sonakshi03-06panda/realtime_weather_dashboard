@@ -5,11 +5,20 @@ from datetime import datetime
 from streamlit_lottie import st_lottie
 import time
 
-# OpenWeatherMap API Key
 API_KEY = "your_api_key_here"
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 # ----------------- Utility Functions -----------------
+
+CITY_NAME_MAPPING = {
+    "Bangalore": "Bengaluru",
+    "Bombay": "Mumbai",
+    "Madras": "Chennai",
+    "Calcutta": "Kolkata"
+}
+
+def normalize_city_name(city):
+    return CITY_NAME_MAPPING.get(city, city)
 
 def get_weather(city):
     params = {"q": city, "appid": API_KEY, "units": "metric"}
@@ -21,8 +30,8 @@ def get_weather(city):
 def get_location_by_ip():
     g = geocoder.ip("me")
     if g.ok:
-        return g.city or "Delhi"
-    return "Delhi"
+        return g.city
+    return None
 
 def load_lottie_url(url):
     r = requests.get(url)
@@ -62,7 +71,29 @@ def show_weather_alerts(temp, wind_speed, weather_main):
         for alert in alerts:
             st.markdown(f"- {alert}")
 
-# ----------------- Lottie URLs -----------------
+def clothing_suggestion(temp, weather_main):
+    suggestions = []
+    if temp >= 35:
+        suggestions.append("🧢 Light cap, 👕 cotton t-shirt, 🩳 shorts, and 🕶️ sunglasses.")
+    elif 25 <= temp < 35:
+        suggestions.append("👕 T-shirt, 👖 jeans or trousers, and 🧴 sunscreen.")
+    elif 15 <= temp < 25:
+        suggestions.append("🧥 Light jacket or hoodie, 👖 jeans, and 👟 closed shoes.")
+    elif 5 <= temp < 15:
+        suggestions.append("🧣 Scarf, 🧥 warm jacket, 🧤 gloves, and boots.")
+    else:
+        suggestions.append("🧣 Thick scarf, 🧥 heavy coat, 🧤 thermal gloves, and ❄️ snow boots.")
+
+    if weather_main in ["Rain", "Drizzle"]:
+        suggestions.append("☔ Carry an umbrella or wear a waterproof jacket.")
+    if weather_main == "Snow":
+        suggestions.append("⛷️ Wear insulated boots and thermal layers.")
+    if weather_main == "Thunderstorm":
+        suggestions.append("⚡ Avoid metal accessories and stay indoors if possible.")
+
+    return suggestions
+
+# ----------------- Lottie Animations -----------------
 
 LOTTIE_MAP = {
     "Clear": "https://assets4.lottiefiles.com/packages/lf20_ukvg3jub.json",
@@ -83,12 +114,17 @@ PLANT_MAP = {
     "Clouds": "https://assets5.lottiefiles.com/packages/lf20_k8nL1n.json"
 }
 
+POPULAR_INDIAN_CITIES = [
+    "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata", "Hyderabad",
+    "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Bhopal", "Chandigarh", "Patna", "Indore"
+]
+
 # ----------------- Streamlit Layout -----------------
 
 st.set_page_config(layout="wide", page_title="Real-Time Weather Dashboard")
 st.title("🌤️ Real-Time Weather Dashboard")
 
-# 🕒 Auto-refresh every 60 seconds
+# Auto-refresh
 AUTO_REFRESH_INTERVAL = 60
 if "last_refresh" not in st.session_state:
     st.session_state.last_refresh = time.time()
@@ -101,20 +137,17 @@ if time_since_refresh >= AUTO_REFRESH_INTERVAL:
     st.session_state.last_refresh = time.time()
     st.experimental_rerun()
 
-# Location input
-POPULAR_INDIAN_CITIES = [
-    "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata", "Hyderabad",
-    "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Bhopal", "Chandigarh", "Patna", "Indore"
-]
-
+# Location detection and fallback
 with st.expander("🔍 Customize Location", expanded=True):
     auto_detect = st.toggle("📡 Use My Location", value=True)
     if auto_detect:
         city = get_location_by_ip()
         if city:
+            city = normalize_city_name(city)
             st.success(f"📍 Detected Location: **{city}**")
         else:
-            city = st.selectbox("📌 Select your city (fallback)", POPULAR_INDIAN_CITIES, index=0)
+            st.warning("⚠️ Location could not be detected. Please select a city manually.")
+            city = st.selectbox("📌 Choose your city", POPULAR_INDIAN_CITIES, index=0)
     else:
         manual_mode = st.radio("📍 Choose Input Mode", ["Type city", "Select from list"], horizontal=True)
         if manual_mode == "Type city":
@@ -123,8 +156,9 @@ with st.expander("🔍 Customize Location", expanded=True):
             city = st.selectbox("📌 Select your city", POPULAR_INDIAN_CITIES, index=0)
 
 if city:
-    data = get_weather(city)
-    if data:
+    normalized_city = normalize_city_name(city)
+    data = get_weather(normalized_city)
+    if data and data.get("cod") == 200:
         weather_main = data['weather'][0]['main']
         description = data['weather'][0]['description'].title()
         icon = data['weather'][0]['icon']
@@ -148,41 +182,15 @@ if city:
             st.write(f"**💨 Wind:** {wind_speed} m/s")
             st.write(f"**🌈 Condition:** {description}")
             st.write(f"**🕒 Local Time:** {formatted_time}")
-            lottie_url = LOTTIE_MAP.get(weather_main, None)
-            if lottie_url:
-                st_lottie(load_lottie_url(lottie_url), height=250)
+            if weather_main in LOTTIE_MAP:
+                st_lottie(load_lottie_url(LOTTIE_MAP[weather_main]), height=250)
             show_weather_alerts(temp, wind_speed, weather_main)
         with col2:
-            plant_url = PLANT_MAP.get(weather_main, None)
-            if plant_url:
-                st_lottie(load_lottie_url(plant_url), height=150)
-
-        # ----------------- AI Clothing Suggestion -----------------
-        def clothing_suggestion(temp, weather_main):
-            suggestions = []
-            if temp >= 35:
-                suggestions.append("🧢 Light cap, 👕 cotton t-shirt, 🩳 shorts, and 🕶️ sunglasses.")
-            elif 25 <= temp < 35:
-                suggestions.append("👕 T-shirt, 👖 jeans or trousers, and 🧴 sunscreen.")
-            elif 15 <= temp < 25:
-                suggestions.append("🧥 Light jacket or hoodie, 👖 jeans, and 👟 closed shoes.")
-            elif 5 <= temp < 15:
-                suggestions.append("🧣 Scarf, 🧥 warm jacket, 🧤 gloves, and boots.")
-            else:
-                suggestions.append("🧣 Thick scarf, 🧥 heavy coat, 🧤 thermal gloves, and ❄️ snow boots.")
-
-            if weather_main in ["Rain", "Drizzle"]:
-                suggestions.append("☔ Carry an umbrella or wear a waterproof jacket.")
-            if weather_main == "Snow":
-                suggestions.append("⛷️ Wear insulated boots and thermal layers.")
-            if weather_main == "Thunderstorm":
-                suggestions.append("⚡ Avoid metal accessories and stay indoors if possible.")
-
-            return suggestions
+            if weather_main in PLANT_MAP:
+                st_lottie(load_lottie_url(PLANT_MAP[weather_main]), height=150)
 
         st.markdown("👗 **AI-Based Clothing Suggestions:**")
         for line in clothing_suggestion(temp, weather_main):
             st.markdown(f"- {line}")
     else:
-        st.error("City not found or API error.")
-        
+        st.error("⚠️ City not found or weather data unavailable. Please try a different city.")
