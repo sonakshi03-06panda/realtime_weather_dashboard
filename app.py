@@ -155,8 +155,6 @@ if city:
         local_time = datetime.utcfromtimestamp(data["dt"] + timezone)
         formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        st.markdown(f"<style>.stApp {{ background-color: {get_background_color(weather_main)}; }}</style>", unsafe_allow_html=True)
-
         col1, col2 = st.columns([3, 1])
         with col1:
             st.subheader(f"📍 {city}")
