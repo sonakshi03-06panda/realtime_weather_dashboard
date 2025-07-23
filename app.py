@@ -5,7 +5,7 @@ from streamlit_lottie import st_lottie
 import time
 
 # API Setup
-API_KEY = "your_api_key_here"
+API_KEY = st.secrets["api"]["openweather"]
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 # City aliases (if needed)
