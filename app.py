@@ -1,20 +1,19 @@
 import streamlit as st
 import requests
-import geocoder
 from datetime import datetime
 from streamlit_lottie import st_lottie
 import time
 
+# API Setup
 API_KEY = "your_api_key_here"
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
-# ----------------- Utility Functions -----------------
-
+# City aliases (if needed)
 CITY_NAME_MAPPING = {
-    "Bangalore": "Bengaluru",
-    "Bombay": "Mumbai",
-    "Madras": "Chennai",
-    "Calcutta": "Kolkata"
+    "Bangalore, IN": "Bengaluru, IN",
+    "Bombay, IN": "Mumbai, IN",
+    "Madras, IN": "Chennai, IN",
+    "Calcutta, IN": "Kolkata, IN"
 }
 
 def normalize_city_name(city):
@@ -24,23 +23,23 @@ def get_weather(city):
     params = {"q": city, "appid": API_KEY, "units": "metric"}
     response = requests.get(BASE_URL, params=params)
     if response.status_code == 200:
-        return response.json()
-    return None
-
-def get_location_by_ip():
-    g = geocoder.ip("me")
-    if g.ok:
-        return g.city
+        data = response.json()
+        if data.get("cod") == 200:
+            return data
+        else:
+            st.error(f"⚠️ API Error: {data.get('message')}")
+    else:
+        st.error(f"⚠️ HTTP Error: {response.status_code}")
     return None
 
 def load_lottie_url(url):
     r = requests.get(url)
-    if r.status_code != 200:
-        return None
-    return r.json()
+    if r.status_code == 200:
+        return r.json()
+    return None
 
 def get_background_color(weather_main):
-    mapping = {
+    colors = {
         "Clear": "#fdd835",
         "Clouds": "#90a4ae",
         "Rain": "#4fc3f7",
@@ -50,51 +49,51 @@ def get_background_color(weather_main):
         "Mist": "#cfd8dc",
         "Haze": "#e0e0e0"
     }
-    return mapping.get(weather_main, "#eeeeee")
+    return colors.get(weather_main, "#ffffff")
 
 def show_weather_alerts(temp, wind_speed, weather_main):
     alerts = []
     if temp >= 38:
-        alerts.append("🔥 **Heatwave Alert:** Stay hydrated and avoid direct sunlight.")
+        alerts.append("🔥 **Heatwave Alert**: Stay hydrated!")
     elif temp <= 5:
-        alerts.append("❄️ **Cold Alert:** Dress warmly to avoid hypothermia.")
+        alerts.append("❄️ **Cold Alert**: Wear layers to stay warm.")
     if wind_speed >= 10:
-        alerts.append("🌬️ **High Wind Alert:** Secure outdoor items and be cautious.")
-    if weather_main in ["Thunderstorm"]:
-        alerts.append("⛈️ **Thunderstorm Alert:** Stay indoors and unplug electronics.")
+        alerts.append("🌬️ **High Wind Alert**: Be cautious outdoors.")
+    if weather_main == "Thunderstorm":
+        alerts.append("⛈️ **Thunderstorm Warning**: Stay indoors.")
     if weather_main in ["Rain", "Drizzle"] and wind_speed > 7:
-        alerts.append("🌧️ **Heavy Rain Warning:** Watch for flooding or roadblocks.")
+        alerts.append("🌧️ **Heavy Rain**: Watch for flooding.")
     if weather_main == "Snow":
-        alerts.append("🌨️ **Snowfall Alert:** Expect slippery roads and low visibility.")
+        alerts.append("🌨️ **Snow Alert**: Roads may be slippery.")
+
     if alerts:
         st.warning("🚨 Weather Alerts:")
-        for alert in alerts:
-            st.markdown(f"- {alert}")
+        for a in alerts:
+            st.markdown(f"- {a}")
 
 def clothing_suggestion(temp, weather_main):
-    suggestions = []
+    outfit = []
     if temp >= 35:
-        suggestions.append("🧢 Light cap, 👕 cotton t-shirt, 🩳 shorts, and 🕶️ sunglasses.")
+        outfit.append("🧢 Light cap, 👕 cotton t-shirt, 🩳 shorts, 🕶️ sunglasses.")
     elif 25 <= temp < 35:
-        suggestions.append("👕 T-shirt, 👖 jeans or trousers, and 🧴 sunscreen.")
+        outfit.append("👕 T-shirt, 👖 jeans, 🧴 sunscreen.")
     elif 15 <= temp < 25:
-        suggestions.append("🧥 Light jacket or hoodie, 👖 jeans, and 👟 closed shoes.")
+        outfit.append("🧥 Light jacket or hoodie, 👟 closed shoes.")
     elif 5 <= temp < 15:
-        suggestions.append("🧣 Scarf, 🧥 warm jacket, 🧤 gloves, and boots.")
+        outfit.append("🧣 Scarf, 🧥 warm jacket, 🧤 gloves.")
     else:
-        suggestions.append("🧣 Thick scarf, 🧥 heavy coat, 🧤 thermal gloves, and ❄️ snow boots.")
+        outfit.append("🧣 Thick scarf, 🧥 heavy coat, 🧤 thermal gloves.")
 
     if weather_main in ["Rain", "Drizzle"]:
-        suggestions.append("☔ Carry an umbrella or wear a waterproof jacket.")
+        outfit.append("☔ Umbrella or waterproof jacket.")
     if weather_main == "Snow":
-        suggestions.append("⛷️ Wear insulated boots and thermal layers.")
+        outfit.append("❄️ Insulated boots, thermal wear.")
     if weather_main == "Thunderstorm":
-        suggestions.append("⚡ Avoid metal accessories and stay indoors if possible.")
+        outfit.append("⚡ Avoid metal accessories.")
 
-    return suggestions
+    return outfit
 
-# ----------------- Lottie Animations -----------------
-
+# Lottie animations
 LOTTIE_MAP = {
     "Clear": "https://assets4.lottiefiles.com/packages/lf20_ukvg3jub.json",
     "Clouds": "https://assets10.lottiefiles.com/private_files/lf30_mn53fgpa.json",
@@ -115,82 +114,65 @@ PLANT_MAP = {
 }
 
 POPULAR_INDIAN_CITIES = [
-    "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata", "Hyderabad",
-    "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Bhopal", "Chandigarh", "Patna", "Indore"
+    "Mumbai, IN", "Delhi, IN", "Bangalore, IN", "Chennai, IN", "Kolkata, IN",
+    "Hyderabad, IN", "Pune, IN", "Ahmedabad, IN", "Jaipur, IN", "Lucknow, IN",
+    "Bhopal, IN", "Chandigarh, IN", "Patna, IN", "Indore, IN"
 ]
 
-# ----------------- Streamlit Layout -----------------
-
-st.set_page_config(layout="wide", page_title="Real-Time Weather Dashboard")
+# Streamlit UI
+st.set_page_config(page_title="Weather Dashboard", layout="wide")
 st.title("🌤️ Real-Time Weather Dashboard")
 
-# Auto-refresh
-AUTO_REFRESH_INTERVAL = 60
+# Auto-refresh every 60 seconds
 if "last_refresh" not in st.session_state:
     st.session_state.last_refresh = time.time()
-time_since_refresh = time.time() - st.session_state.last_refresh
-refresh_remaining = AUTO_REFRESH_INTERVAL - time_since_refresh
-with st.sidebar:
-    st.markdown("⏱️ **Auto Refresh:** every 60s")
-    st.progress(max(0, 1 - refresh_remaining / AUTO_REFRESH_INTERVAL))
-if time_since_refresh >= AUTO_REFRESH_INTERVAL:
+if time.time() - st.session_state.last_refresh >= 60:
     st.session_state.last_refresh = time.time()
     st.experimental_rerun()
 
-# Location detection and fallback
-with st.expander("🔍 Customize Location", expanded=True):
-    auto_detect = st.toggle("📡 Use My Location", value=True)
-    if auto_detect:
-        city = get_location_by_ip()
-        if city:
-            city = normalize_city_name(city)
-            st.success(f"📍 Detected Location: **{city}**")
-        else:
-            st.warning("⚠️ Location could not be detected. Please select a city manually.")
-            city = st.selectbox("📌 Choose your city", POPULAR_INDIAN_CITIES, index=0)
+st.sidebar.markdown("⏱️ **Auto-refresh every 60 seconds**")
+
+# Location selection
+with st.expander("📍 Choose Your Location", expanded=True):
+    mode = st.radio("Mode", ["Select from List", "Manual Entry"], horizontal=True)
+    if mode == "Select from List":
+        city = st.selectbox("Choose a City", POPULAR_INDIAN_CITIES)
     else:
-        manual_mode = st.radio("📍 Choose Input Mode", ["Type city", "Select from list"], horizontal=True)
-        if manual_mode == "Type city":
-            city = st.text_input("📝 Enter City Name:", "Delhi")
-        else:
-            city = st.selectbox("📌 Select your city", POPULAR_INDIAN_CITIES, index=0)
+        city = st.text_input("Enter City Name (e.g., 'Delhi, IN')", value="Delhi, IN")
 
 if city:
-    normalized_city = normalize_city_name(city)
-    data = get_weather(normalized_city)
-    if data and data.get("cod") == 200:
-        weather_main = data['weather'][0]['main']
-        description = data['weather'][0]['description'].title()
-        icon = data['weather'][0]['icon']
-        temp = data['main']['temp']
-        humidity = data['main']['humidity']
-        wind_speed = data['wind']['speed']
-        timezone = data['timezone']
-        local_time = datetime.utcfromtimestamp(data['dt'] + timezone)
+    city = normalize_city_name(city)
+    data = get_weather(city)
+
+    if data:
+        weather = data["weather"][0]
+        weather_main = weather["main"]
+        description = weather["description"].title()
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        wind_speed = data["wind"]["speed"]
+        timezone = data["timezone"]
+        local_time = datetime.utcfromtimestamp(data["dt"] + timezone)
         formatted_time = local_time.strftime("%Y-%m-%d %H:%M:%S")
 
-        st.markdown(
-            f"<style>.stApp {{ background-color: {get_background_color(weather_main)}; }}</style>",
-            unsafe_allow_html=True
-        )
+        st.markdown(f"<style>.stApp {{ background-color: {get_background_color(weather_main)}; }}</style>", unsafe_allow_html=True)
 
         col1, col2 = st.columns([3, 1])
         with col1:
-            st.subheader(f"📍 {city.title()}")
+            st.subheader(f"📍 {city}")
             st.write(f"**🌡️ Temp:** {temp} °C")
             st.write(f"**💧 Humidity:** {humidity}%")
-            st.write(f"**💨 Wind:** {wind_speed} m/s")
+            st.write(f"**💨 Wind Speed:** {wind_speed} m/s")
             st.write(f"**🌈 Condition:** {description}")
             st.write(f"**🕒 Local Time:** {formatted_time}")
             if weather_main in LOTTIE_MAP:
-                st_lottie(load_lottie_url(LOTTIE_MAP[weather_main]), height=250)
+                st_lottie(load_lottie_url(LOTTIE_MAP[weather_main]), height=240)
             show_weather_alerts(temp, wind_speed, weather_main)
+
         with col2:
             if weather_main in PLANT_MAP:
                 st_lottie(load_lottie_url(PLANT_MAP[weather_main]), height=150)
 
-        st.markdown("👗 **AI-Based Clothing Suggestions:**")
-        for line in clothing_suggestion(temp, weather_main):
-            st.markdown(f"- {line}")
-    else:
-        st.error("⚠️ City not found or weather data unavailable. Please try a different city.")
+        st.markdown("👕 **AI-Based Clothing Suggestions:**")
+        for item in clothing_suggestion(temp, weather_main):
+            st.markdown(f"- {item}")
