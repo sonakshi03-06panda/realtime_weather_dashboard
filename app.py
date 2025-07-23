@@ -113,6 +113,12 @@ PLANT_MAP = {
     "Clouds": "https://assets5.lottiefiles.com/packages/lf20_k8nL1n.json"
 }
 
+plant_animation = load_lottie_url(PLANT_MAP.get(weather_main, PLANT_MAP["Clear"]))
+if plant_animation:
+    st_lottie(plant_animation, height=200)
+else:
+    st.markdown("🌱 Plant animation unavailable.")
+
 POPULAR_INDIAN_CITIES = [
     "Mumbai, IN", "Delhi, IN", "Bangalore, IN", "Chennai, IN", "Kolkata, IN",
     "Hyderabad, IN", "Pune, IN", "Ahmedabad, IN", "Jaipur, IN", "Lucknow, IN",
