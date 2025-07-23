@@ -102,13 +102,25 @@ if time_since_refresh >= AUTO_REFRESH_INTERVAL:
     st.experimental_rerun()
 
 # Location input
+POPULAR_INDIAN_CITIES = [
+    "Delhi", "Mumbai", "Bangalore", "Chennai", "Kolkata", "Hyderabad",
+    "Pune", "Ahmedabad", "Jaipur", "Lucknow", "Bhopal", "Chandigarh", "Patna", "Indore"
+]
+
 with st.expander("🔍 Customize Location", expanded=True):
     auto_detect = st.toggle("📡 Use My Location", value=True)
     if auto_detect:
         city = get_location_by_ip()
-        st.success(f"📍 Detected Location: **{city}**")
+        if city:
+            st.success(f"📍 Detected Location: **{city}**")
+        else:
+            city = st.selectbox("📌 Select your city (fallback)", POPULAR_INDIAN_CITIES, index=0)
     else:
-        city = st.text_input("📝 Enter City Name:", "Delhi")
+        manual_mode = st.radio("📍 Choose Input Mode", ["Type city", "Select from list"], horizontal=True)
+        if manual_mode == "Type city":
+            city = st.text_input("📝 Enter City Name:", "Delhi")
+        else:
+            city = st.selectbox("📌 Select your city", POPULAR_INDIAN_CITIES, index=0)
 
 if city:
     data = get_weather(city)
