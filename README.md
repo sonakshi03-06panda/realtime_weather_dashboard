@@ -6,8 +6,7 @@ A visually interactive and AI-enhanced weather dashboard built using **Streamlit
 ## 🚀 Features
 
 - 🌍 **Auto-detects your location** via IP  
-- 🔍 **Manual city search** option  
-- 🌀 **Live weather updates** every 60 seconds  
+- 🔍 **Manual city search** option    
 - 🎞️ **Cute weather and plant animations** (Lottie-based)  
 - 🌡️ Displays temperature, humidity, wind speed, and condition  
 - 🚨 **Weather alerts** for extreme conditions (heatwave, storm, rain, snow)  
