@@ -124,13 +124,11 @@ st.set_page_config(page_title="Weather Dashboard", layout="wide")
 st.title("🌤️ Real-Time Weather Dashboard")
 
 # Auto-refresh every 60 seconds
-if "last_refresh" not in st.session_state:
-    st.session_state.last_refresh = time.time()
-if time.time() - st.session_state.last_refresh >= 60:
-    st.session_state.last_refresh = time.time()
-    st.experimental_rerun()
-
-st.sidebar.markdown("⏱️ **Auto-refresh every 60 seconds**")
+# Top-right manual refresh button
+col_refresh, col_title = st.columns([1, 6])
+with col_refresh:
+    if st.button("🔄 Refresh", help="Click to reload data"):
+        st.experimental_rerun()
 
 # Location selection
 with st.expander("📍 Choose Your Location", expanded=True):
