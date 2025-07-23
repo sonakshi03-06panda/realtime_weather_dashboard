@@ -46,11 +46,12 @@ PLANT_MAP = {
     "Thunderstorm": "https://assets2.lottiefiles.com/packages/lf20_gbfwtkzw.json",
     "Snow": "https://assets4.lottiefiles.com/packages/lf20_6ijgwtux.json",
     "Fog": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
-    "Haze": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
+    "Haze": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",  
     "Smoke": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
     "Dust": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
     "Tornado": "https://assets3.lottiefiles.com/packages/lf20_2sl5dckk.json"
 }
+
 
 LOTTIE_MAP.setdefault("Default", LOTTIE_MAP["Clear"])
 PLANT_MAP.setdefault("Default", PLANT_MAP["Clear"])
