@@ -28,15 +28,28 @@ LOTTIE_MAP = {
     "Drizzle": "https://assets1.lottiefiles.com/packages/lf20_nazjrc1e.json",
     "Snow": "https://assets7.lottiefiles.com/packages/lf20_oGlWy5.json",
     "Mist": "https://assets3.lottiefiles.com/packages/lf20_xx9fzzxl.json",
-    "Haze": "https://assets10.lottiefiles.com/private_files/lf30_obidsi0t.json"
+    "Haze": "https://assets10.lottiefiles.com/private_files/lf30_obidsi0t.json",
+    "Fog": "https://assets3.lottiefiles.com/packages/lf20_xx9fzzxl.json",
+    "Smoke": "https://assets10.lottiefiles.com/packages/lf20_T9zVG5.json",
+    "Dust": "https://assets2.lottiefiles.com/packages/lf20_Stt1R1.json",
+    "Sand": "https://assets2.lottiefiles.com/packages/lf20_Stt1R1.json",
+    "Ash": "https://assets2.lottiefiles.com/packages/lf20_tjsjre.json",
+    "Squall": "https://assets2.lottiefiles.com/packages/lf20_gbfwtkzw.json",
+    "Tornado": "https://assets3.lottiefiles.com/packages/lf20_u4yrau.json"
 }
 
 PLANT_MAP = {
     "Clear": "https://assets5.lottiefiles.com/packages/lf20_tll0j4bb.json",
+    "Clouds": "https://assets5.lottiefiles.com/packages/lf20_k8nL1n.json",
     "Rain": "https://assets5.lottiefiles.com/packages/lf20_8xlcgjiz.json",
+    "Drizzle": "https://assets5.lottiefiles.com/packages/lf20_8xlcgjiz.json",
     "Thunderstorm": "https://assets2.lottiefiles.com/packages/lf20_gbfwtkzw.json",
     "Snow": "https://assets4.lottiefiles.com/packages/lf20_6ijgwtux.json",
-    "Clouds": "https://assets5.lottiefiles.com/packages/lf20_k8nL1n.json"
+    "Fog": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
+    "Haze": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
+    "Smoke": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
+    "Dust": "https://assets10.lottiefiles.com/packages/lf20_lnhvvs.json",
+    "Tornado": "https://assets3.lottiefiles.com/packages/lf20_2sl5dckk.json"
 }
 
 LOTTIE_MAP.setdefault("Default", LOTTIE_MAP["Clear"])
